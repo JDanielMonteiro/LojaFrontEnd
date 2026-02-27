@@ -11,7 +11,6 @@ import {merge} from 'rxjs';
 import {MatButtonModule} from '@angular/material/button';
 import {MatIconModule} from '@angular/material/icon';
 import { RouterModule } from '@angular/router';
-import { CpfMaskDirective } from '../util/cpfMask';
 import { CommonModule } from '@angular/common';
 
 
@@ -21,7 +20,7 @@ import { CommonModule } from '@angular/common';
   styleUrl: './cadastro.css',
   standalone: true,
   imports: [MatCardModule, MatChipsModule, MatProgressBarModule, MatFormFieldModule, MatInputModule, 
-    FormsModule, ReactiveFormsModule, MatButtonModule,MatIconModule, RouterModule, CpfMaskDirective, CommonModule],
+    FormsModule, ReactiveFormsModule, MatButtonModule,MatIconModule, RouterModule, CommonModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Cadastro {
@@ -34,6 +33,20 @@ export class Cadastro {
         cpf: ['', Validators.required],
       });
     }
+
+  mascaraCpfHtml(){
+    let x = document.getElementById("cpf") as HTMLInputElement;
+    x?.addEventListener("keypress", () => {
+      console.log(x.value)
+      let tamanho = x.value.length;
+      if(tamanho === 3 || tamanho === 7){
+        x.value += ".";
+      } else if(tamanho === 11){
+        x.value += "-";
+      }
+
+    })
+  }
 
    updateErrorMessageCpf() {
     if (this.form.get('cpf')?.hasError('required')) {

@@ -10,11 +10,12 @@
             <form class="form" [formGroup]="form" (ngSubmit)="onSubmit()">
             <mat-form-field class="full-width" appearance="outline">
                 <mat-label>CPF</mat-label>
-                <input matInput placeholder="000.000.000-00" value="cpf"
-                    cpfMask
+                <input id = "cpf" matInput 
+                    placeholder="000.000.000-00"
                     maxlength="14"
                     formControlName="cpf"
                     (blur)="updateErrorMessageCpf()"
+                    (input)="mascaraCpfHtml()"
                     required
                 />
                 <mat-error *ngIf="form.get('cpf')?.invalid && form.get('cpf')?.touched">
