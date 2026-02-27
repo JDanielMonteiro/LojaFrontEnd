@@ -1,1 +1,41 @@
-<p>cadastro works!</p>
+<div class = "tela-cadastro"> 
+    <mat-card class="card" appearance="outlined">
+    <mat-card-header>
+        <mat-card-title>Crie a sua conta. É grátis!</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+        <p class = "introducao">Nos informe alguns dados para que possamos melhorar a sua experiência na MotosBr.</p>
+        <div class="divisor-cadastro">
+             
+            <form class="form" [formGroup]="form" (ngSubmit)="onSubmit()">
+            <mat-form-field class="full-width" appearance="outline">
+                <mat-label>CPF</mat-label>
+                <input matInput placeholder="000.000.000-00" value="cpf"
+                    cpfMask
+                    maxlength="14"
+                    formControlName="cpf"
+                    (blur)="updateErrorMessageCpf()"
+                    required
+                />
+                <mat-error *ngIf="form.get('cpf')?.invalid && form.get('cpf')?.touched">
+                    {{ errorMessageCpf() }}
+                </mat-error>
+                <mat-hint>Digite apenas números</mat-hint>
+                    
+            </mat-form-field>
+
+            
+            </form>
+            <button class = "acessar" matButton="filled">Cadastre-se</button>
+        </div>
+
+        <div class = "link-pagina-cadastro">
+            <p>Já tem uma conta? <a routerLink="/login">Entrar</a></p>
+        </div>
+    </mat-card-content>
+    <mat-card-footer class="card-footer">
+    </mat-card-footer>
+    </mat-card>
+</div>
+
+

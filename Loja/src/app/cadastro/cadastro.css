@@ -1,0 +1,41 @@
+body{
+    margin:0%;
+}
+
+.tela-cadastro {
+  height: 100%;          /* altura total da tela */
+  display: flex;
+  justify-content: center; /* centraliza horizontal */
+  align-items: center;
+  text-align: center;     /* centraliza vertical */
+}
+
+.card {
+  max-width: 30%;
+  height: 90%;
+  align-items: center;
+}
+
+mat-form-field{
+  width: 100%;
+  margin-top: 3%;
+} 
+mat-form-field.field-email{
+  margin-top: 20%;
+}
+
+button.acessar{
+   margin-top: 3%;
+    width: 100%;
+}
+
+.link-pagina-cadastro{
+  margin-top: 3%;
+  width: 100%;
+  text-align: center;
+}
+
+
+.card-footer {
+  padding: 16px;
+}
