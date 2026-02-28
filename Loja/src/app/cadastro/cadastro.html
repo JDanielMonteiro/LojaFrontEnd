@@ -10,12 +10,13 @@
             <form class="form" [formGroup]="form" (ngSubmit)="onSubmit()">
             <mat-form-field class="full-width" appearance="outline">
                 <mat-label>CPF</mat-label>
-                <input id = "cpf" matInput 
+                <input id = "Inputcpf" matInput 
                     placeholder="000.000.000-00"
                     maxlength="14"
                     formControlName="cpf"
                     (blur)="updateErrorMessageCpf()"
                     (input)="mascaraCpfHtml()"
+                    (input) = "validarCpf()"
                     required
                 />
                 <mat-error *ngIf="form.get('cpf')?.invalid && form.get('cpf')?.touched">
@@ -24,10 +25,8 @@
                 <mat-hint>Digite apenas números</mat-hint>
                     
             </mat-form-field>
-
-            
+            <button class = "acessar" type ="submit" matButton="filled" [disabled] = "form.invalid">Cadastre-se</button>
             </form>
-            <button class = "acessar" matButton="filled">Cadastre-se</button>
         </div>
 
         <div class = "link-pagina-cadastro">
