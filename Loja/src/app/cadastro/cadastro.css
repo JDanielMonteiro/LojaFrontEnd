@@ -18,7 +18,7 @@ body{
 
 mat-form-field{
   width: 100%;
-  margin-top: 3%;
+  margin-top: 8%;
 } 
 mat-form-field.field-email{
   margin-top: 20%;
@@ -33,6 +33,10 @@ button.acessar{
   margin-top: 3%;
   width: 100%;
   text-align: center;
+}
+
+input::placeholder {
+  color: rgba(0, 0, 0, 0.26) !important; 
 }
 
 
