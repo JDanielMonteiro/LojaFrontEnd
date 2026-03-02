@@ -8,7 +8,7 @@
         <div class="divisor-cadastro">
              
             <form class="form" [formGroup]="form" (ngSubmit)="onSubmit()">
-            <mat-form-field class="full-width" appearance="outline">
+            <mat-form-field class="full-width" appearance="outline" floatLabel="always">
                 <mat-label>CPF</mat-label>
                 <input id = "Inputcpf" matInput 
                     placeholder="000.000.000-00"
@@ -24,6 +24,49 @@
                 </mat-error>
                 <mat-hint>Digite apenas números</mat-hint>
                     
+            </mat-form-field>
+
+            <mat-form-field class="full-width" appearance="outline" floatLabel="always">
+                <mat-label>Nome Completo</mat-label>
+                <input id = "InputNome" matInput 
+                    formControlName="nomeCompleto"
+                    (blur)="updateErrorMessageNome()"
+                    (input) = "validarNomeCompleto()"
+                    required
+                />
+                <mat-error *ngIf="form.get('nomeCompleto')?.invalid && form.get('nomeCompleto')?.touched">
+                    {{ errorMessageNome() }}
+                </mat-error>
+                <mat-hint>Digite seu nome completo</mat-hint>       
+            </mat-form-field>
+
+            <mat-form-field class="full-width" appearance="outline" floatLabel="always">
+                <mat-label>Como você quer ser chamado(a)?</mat-label>
+                <input id = "InputnomePublico" matInput 
+                    placeholder = "Exemplo: João S."
+                    formControlName="nomePublico"
+                    required
+                />
+                <!-- <mat-error *ngIf="form.get('nomePublico')?.invalid && form.get('nomePublico')?.touched">
+                    {{ errorMessagenomePublico() }}
+                </mat-error> -->      
+            </mat-form-field>
+
+            <mat-form-field class="full-width" appearance="outline" floatLabel="always">
+                <mat-label>Data de nascimento</mat-label>
+                <input id = "InputDataNascimento" matInput 
+                    required
+                    formControlName="dataNascimento" 
+                    placeholder="DD/MM/AAAA" 
+                    maxlength="10"
+                    (input)="aplicarMascaraData($event)"
+                    (blur)="isDataValida($event.target.value)" 
+                />
+                <!--$event pega os dados da tag HTML e passa como parametro para a função no TS. -->
+
+                <mat-error *ngIf="form.get('dataNascimento')?.invalid && form.get('dataNascimento')?.touched">
+                    {{ errorMessageDataNascimento() }}
+                </mat-error>
             </mat-form-field>
             <button class = "acessar" type ="submit" matButton="filled" [disabled] = "form.invalid">Cadastre-se</button>
             </form>

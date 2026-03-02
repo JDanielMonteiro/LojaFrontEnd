@@ -3,7 +3,7 @@ body{
 }
 
 .tela-cadastro {
-  height: 100%;          /* altura total da tela */
+  height: auto;          /* altura total da tela */
   display: flex;
   justify-content: center; /* centraliza horizontal */
   align-items: center;
@@ -11,8 +11,10 @@ body{
 }
 
 .card {
+  margin-top: 5%;
+  margin-bottom: 5%;
   max-width: 30%;
-  height: 90%;
+  height: auto;
   align-items: center;
 }
 
@@ -25,7 +27,7 @@ mat-form-field.field-email{
 }
 
 button.acessar{
-   margin-top: 3%;
+   margin-top: 10%;
     width: 100%;
 }
 
@@ -38,6 +40,7 @@ button.acessar{
 input::placeholder {
   color: rgba(0, 0, 0, 0.26) !important; 
 }
+
 
 
 .card-footer {
