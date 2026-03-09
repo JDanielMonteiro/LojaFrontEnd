@@ -14,9 +14,8 @@
                     placeholder="000.000.000-00"
                     maxlength="14"
                     formControlName="cpf"
-                    (blur)="updateErrorMessageCpf()"
+                    (blur)="updateErrorMessage()"
                     (input)="mascaraCpfHtml()"
-                    (input) = "validarCpf()"
                     required
                 />
                 <mat-error *ngIf="form.get('cpf')?.invalid && form.get('cpf')?.touched">
@@ -30,8 +29,7 @@
                 <mat-label>Nome Completo</mat-label>
                 <input id = "InputNome" matInput 
                     formControlName="nomeCompleto"
-                    (blur)="updateErrorMessageNome()"
-                    (input) = "validarNomeCompleto()"
+                    (blur)="updateErrorMessage()"
                     required
                 />
                 <mat-error *ngIf="form.get('nomeCompleto')?.invalid && form.get('nomeCompleto')?.touched">
@@ -59,8 +57,8 @@
                     formControlName="dataNascimento" 
                     placeholder="DD/MM/AAAA" 
                     maxlength="10"
-                    (input)="aplicarMascaraData($event)"
-                    (blur)="isDataValida($event.target.value)" 
+                    (input)="aplicarMascaraData($event)" 
+                    (blur)="updateErrorMessage()"
                 />
                 <!--$event pega os dados da tag HTML e passa como parametro para a função no TS. -->
 
@@ -68,6 +66,97 @@
                     {{ errorMessageDataNascimento() }}
                 </mat-error>
             </mat-form-field>
+            <mat-form-field class="full-width" appearance= "outline" floatLabel="always">
+                    <mat-label>Email</mat-label>
+                    <input class = "caixa-email"
+                    matInput
+                    placeholder="pat@example.com"
+                    formControlName="email"
+                    (blur)="updateErrorMessage()"
+                    required
+                    />
+                <mat-error *ngIf="form.get('email')?.invalid && form.get('email')?.touched">
+                    {{ errorMessageEmail() }}
+                </mat-error>
+            </mat-form-field>
+            <mat-form-field class="full-width" appearance="outline" floatLabel="always">
+                <mat-label>Senha</mat-label>
+                <input id = "InputSenha" matInput [type]="hide() ? 'password' : 'text'" 
+                    required
+                    formControlName="senha"  
+                    minlength="8"
+                    maxlength="50"
+                />
+                <button
+                matIconButton
+                matSuffix
+                (click)="clickEvent($event)"
+                [attr.aria-label]="'Hide password'"
+                [attr.aria-pressed]="hide()"
+                type="button"
+                >
+
+                <mat-icon>{{hide() ? 'visibility_off' : 'visibility'}}</mat-icon>
+                </button>
+                <!--$event pega os dados da tag HTML e passa como parametro para a função no TS. -->
+                <mat-error *ngIf="!form.get('senha')?.valid && form.get('senha')?.touched">
+                    {{ errorMessageSenha() }}
+                </mat-error>
+            </mat-form-field>
+            <div class = "senhaErro">
+                <p>Para sua segurança, crie uma senha com no mínimo:</p>
+                <ul>
+                    <!-- <li *ngFor="let i of errorMessageSenha">
+                        {{ i }}
+                    </li> -->
+                    <li>
+                        @if (form.get('senha')?.value?.length >= 8) {
+                            <mat-icon class="senha-sem-erro" fontIcon="check_circle"></mat-icon>
+                            <span class="senha-sem-erro">8 ou mais caracteres</span>
+                        } @else {
+                            <mat-icon class="senha-com-erro" fontIcon="close"></mat-icon>
+                            <span class="senha-com-erro">8 ou mais caracteres</span>
+                        }
+                    </li>
+                    <li>
+                         @if (form.get('senha')?.hasError('semLetraMaiuscula') || !form.get('senha')?.value ) {
+                            <mat-icon class="senha-com-erro" fontIcon="close"></mat-icon>
+                            <span class="senha-com-erro">Uma letra maiúscula</span>
+                        } @else{
+                             <mat-icon class="senha-sem-erro" fontIcon="check_circle"></mat-icon>
+                            <span class="senha-sem-erro">Uma letra maiúscula</span>
+                        }
+                    </li>
+
+                    <li>
+                        @if (form.get('senha')?.hasError('semLetraMinuscula') || !form.get('senha')?.value ) {
+                            <mat-icon class="senha-com-erro" fontIcon="close"></mat-icon>
+                            <span class="senha-com-erro">Uma letra minúscula</span>
+                        } @else{
+                             <mat-icon class="senha-sem-erro" fontIcon="check_circle"></mat-icon>
+                            <span class="senha-sem-erro">Uma letra minúscula</span>
+                        }
+                    </li>
+                    <li>
+                        @if (form.get('senha')?.hasError('semNumero') || !form.get('senha')?.value ) {
+                            <mat-icon class="senha-com-erro" fontIcon="close"></mat-icon>
+                            <span class="senha-com-erro">Um número</span>
+                        } @else{
+                             <mat-icon class="senha-sem-erro" fontIcon="check_circle"></mat-icon>
+                            <span class="senha-sem-erro">Um número</span>
+                        }
+                    </li>
+                    <li>
+                        @if (form.get('senha')?.hasError('semCaracterEspecial') || !form.get('senha')?.value ) {
+                            <mat-icon class="senha-com-erro" fontIcon="close"></mat-icon>
+                            <span class="senha-com-erro">Um caracter especial (exemplo: @ ! $ & #)</span>
+                        } @else{
+                             <mat-icon class="senha-sem-erro" fontIcon="check_circle"></mat-icon>
+                            <span class="senha-sem-erro">Um caracter especial (exemplo: @ ! $ & #)</span>
+                        }
+                    </li>
+                </ul>
+            </div>
             <button class = "acessar" type ="submit" matButton="filled" [disabled] = "form.invalid">Cadastre-se</button>
             </form>
         </div>

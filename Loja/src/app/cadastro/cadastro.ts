@@ -3,7 +3,7 @@ import {MatCardModule} from '@angular/material/card';
 import {MatChipsModule} from '@angular/material/chips';
 import {ChangeDetectionStrategy, Component, signal, inject} from '@angular/core';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
-import {FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
+import {AbstractControl, FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatInputModule} from '@angular/material/input';
 import {merge} from 'rxjs';
@@ -33,14 +33,22 @@ export class Cadastro {
     form: FormGroup;
     private _snackBar = inject(MatSnackBar);
     errorMessageDataNascimento = signal('');
+    errorMessageEmail= signal('');
+    hide = signal(true);
+    errorMessageSenha = signal('Esta senha não atende aos requisitos mínimos.');
     
 
   constructor(private fb: FormBuilder) {
       this.form = this.fb.group({
-        cpf: ['', Validators.required],
-        nomeCompleto: ['', Validators.required],
+        cpf: ['', [Validators.required, Validators.pattern(/^[0-9.-]*$/), this.validaCpf]],
+        nomeCompleto: ['', [Validators.required, this.validaNomeCompleto]],
         nomePublico:  ['', Validators.required],
-        dataNascimento: ['', Validators.required],
+        dataNascimento: ['', [Validators.required, this.validaDataValida]],
+        email: ['', [Validators.required, Validators.email]],
+        senha: ['', [Validators.required,Validators.minLength(8), 
+          this.validaSenhaMaiuscula, this.validaSenhaMinuscula, 
+          this.validaSenhaPossuiCaracterEspecial, this.validaSenhaPossuiNumero
+        ]]
       });
     }
 
@@ -61,28 +69,27 @@ export class Cadastro {
     })
   }
 
-
-  contemLetra(texto: string): boolean {
-  const regex = /\p{L}/u;
-  return regex.test(texto);
+  private contemLetra(texto: string): boolean {
+    const regex = /\p{L}/u;
+    return regex.test(texto);
   }
 
-  validarCpf() {
-    let x = document.getElementById("Inputcpf") as HTMLInputElement;
-    var cpf = x.value;
-    cpf = cpf.replace(/[^\d]+/g,''); // Remove caracteres não numéricos
-      //console.log(cpf);
-    // Verifica se tem 11 dígitos ou se é uma sequência de repetidos
-    if (cpf.length !== 11 || /^(\d)\1+$/.test(cpf)) {
-      this.form.get("cpf")?.setErrors({erroTamanho : true})  // quando é um objeto : sifnifica recebe   
-      //console.log(this.form.invalid);
-      this.updateErrorMessageCpf();
-      this.form.markAsPristine();
-      return;
-    } else{
-        this.form.get("cpf")?.setErrors(null);
+  private validaCpf(control: AbstractControl) {
+    let cpf = control.value;
+
+    if (!cpf) return null;
+
+    const errors: any = {};
+
+    cpf = cpf.replace(/[^\d]+/g,'');
+
+    
+    if(cpf.length !== 11 || /^(\d)\1+$/.test(cpf)){
+        errors['erroTamanho'] = true;
+    }else{
+       delete errors['erroTamanho'];
     }
-       // Cálculo dos dígitos verificadores
+
     let calculoCpfValido = true;
     for (let t = 9; t < 11; t++) {
         let soma = 0;
@@ -94,66 +101,64 @@ export class Cadastro {
         if (digito !== parseInt(cpf[t])) calculoCpfValido = false;
     }
     if(calculoCpfValido == false){
-      this.form.get("cpf")?.setErrors({erroDigitosAleatorios : true})  // quando é um objeto : sifnifica recebe   
-      this.updateErrorMessageCpf();
-    } else{
-        this.form.get("cpf")?.setErrors(null);
+      errors['erroDigitosAleatorios'] = true;
+    }else{
+       delete errors['erroDigitosAleatorios'];
     }
-    
+    return Object.keys(errors).length ? errors : null;
   }
-
-   updateErrorMessageCpf() {
-    if (this.form.get('cpf')?.hasError('required')) {
-      this.errorMessageCpf.set('Campo obrigatório. Informe um CPF válido.');
-    } else if(this.form.get('cpf')?.hasError('erroTamanho')){
-       this.errorMessageCpf.set('cpf incompleto ou numeros repetidos.');
-    } else if(this.form.get('cpf')?.hasError('erroDigitosAleatorios')){
-       this.errorMessageCpf.set('Numeros Aleatorios Digitados.');
-    }
-    else {
-      this.errorMessageCpf.set('');
-    }
-  }
-
-  openSnackBar(mensage : string) {
-    this._snackBar.open(mensage, 'Fechar', {
-      horizontalPosition: "right",  // , é pq é um objeto
-      verticalPosition: "top",
-      duration: 10 * 1000,
-
-    });
-  }
-
  
-  validarNomeCompleto() {    //Valida se um nome completo é válido. //  Regras: Apenas letras/espaços/hífens, min. 3 caracteres, pelo menos duas palavras.
-    let x = document.getElementById("InputNome") as HTMLInputElement;
-    var nome = x.value;
-    if (!nome) return;
+  private validaNomeCompleto(control:AbstractControl) {    //Valida se um nome completo é válido. //  Regras: Apenas letras/espaços/hífens, min. 3 caracteres, pelo menos duas palavras.
+    var nome =control.value;
+    
+    if (!nome) return null;
+
+    const errors: any = {};
 
     const nomeLimpo = nome.trim();      // trim(); serve para quebrar uma string. Ex: nesse caso tá quebrando com espaço, e transformando em uma lista de strings.
-
     const regex = /^[a-zA-ZÀ-ÿ\s'-]{3,80}$/;   // Regex: Permite letras, espaços, apóstrofos e hífens.
 
     if(regex.test(nomeLimpo) && nomeLimpo.split(/\s+/).length >= 2){    // Verifica se o regex passa e se há pelo menos um espaço (duas palavras)
-      this.form.get("nomeCompleto")?.setErrors(null);
-      //console.log("passou");
+      delete errors['nomeInvalido'];
     } else {
-        this.form.get("nomeCompleto")?.setErrors({nomeInvalido : true})  // quando é um objeto : sifnifica recebe   
-        this. updateErrorMessageNome();
-        this.form.markAsPristine();
-        //console.log("entrou no erro");
-        return;
+        errors['nomeInvalido'] = true;
     }
+    
+    return Object.keys(errors).length ? errors : null;
   }
 
-  updateErrorMessageNome() {
-    if (this.form.get('nomeCompleto')?.hasError('required')) {
-      this.errorMessageNome.set('Campo obrigatório. Informe um Nome válido.');
-    } else if(this.form.get('nomeCompleto')?.hasError('nomeInvalido')){
-       this.errorMessageNome.set('Nome incompleto.');
+ private validaDataValida(control:AbstractControl) {      
+    var dataStr = control.value;
+    // const errors = control.errors || {};
+
+    if (!dataStr) return null;
+
+    const errors: any = {};
+
+    const regex = /^\d{2}\/\d{2}\/\d{4}$/;
+    if (!regex.test(dataStr)){
+      errors['DataIncompleta'] = true;
     } else {
-      this.errorMessageNome.set('');
+      delete errors['DataIncompleta'];
     }
+
+    const [dia, mes, ano] = dataStr.split('/').map(Number);
+    const dataObjeto = new Date(ano, mes - 1, dia);
+    const dataHoje = new Date();
+    // Verifica se o objeto Date corrigiu o valor (ex: 31/02 vira 03/03)
+
+    if(
+      dataObjeto.getFullYear() === ano &&
+      dataObjeto.getMonth() === mes - 1 &&
+      dataObjeto.getDate() === dia &&
+      dataObjeto < dataHoje
+    ){      
+      delete errors['dataInvalida'];
+    } else{
+      errors['dataInvalida'] = true;   
+    }
+
+    return Object.keys(errors).length ? errors : null;
   }
 
   aplicarMascaraData(event: any) {
@@ -169,61 +174,130 @@ export class Cadastro {
     event.target.value = valor;
   }
 
-  isDataValida(dataStr: string) {       // dataStr é quem recebe o dado que vem do $event do HTML
-    // Valida o formato básico primeiro
-    const regex = /^\d{2}\/\d{2}\/\d{4}$/;
-    if (!regex.test(dataStr)){
-      this.form.get("dataNascimento")?.setErrors({DataIncompleta : true});
-      this.updateErrorMessageDataNascimento();
-      this.form.markAsPristine();
+  updateErrorMessage() {
+    if (this.form.get('cpf')?.hasError('required')) {
+      this.errorMessageCpf.set('Campo obrigatório. Informe um CPF válido.');
+    } else if(this.form.get('cpf')?.hasError('erroTamanho')){
+       this.errorMessageCpf.set('cpf incompleto ou numeros repetidos.');
+    } else if(this.form.get('cpf')?.hasError('erroDigitosAleatorios')){
+       this.errorMessageCpf.set('Numeros Aleatorios Digitados.');
+    }
+    else if(!this.form.get('cpf')?.invalid) {
+      this.errorMessageCpf.set('');
     }
 
-    const [dia, mes, ano] = dataStr.split('/').map(Number);
-    const dataObjeto = new Date(ano, mes - 1, dia);
-    const dataHoje = new Date();
-    // Verifica se o objeto Date corrigiu o valor (ex: 31/02 vira 03/03)
-
-    if(
-      dataObjeto.getFullYear() === ano &&
-      dataObjeto.getMonth() === mes - 1 &&
-      dataObjeto.getDate() === dia &&
-      dataObjeto < dataHoje
-    ){
-
-      this.form.get("dataNascimento")?.setErrors(null);
-      console.log("data valida");
-    } else{
-      this.form.get("dataNascimento")?.setErrors({dataInvalida : true});
-      this.updateErrorMessageDataNascimento();
-      this.form.markAsPristine();   // markAsPristine ELE CHAMA O FORMULARIO E MARCA TUDO QUE ESTIVER ERRADO
-      
+    //nome completo
+    if (this.form.get('nomeCompleto')?.hasError('required')) {
+      this.errorMessageNome.set('Campo obrigatório. Informe um Nome válido.');
+    } else if(this.form.get('nomeCompleto')?.hasError('nomeInvalido')){
+       this.errorMessageNome.set('Nome incompleto.');
+    } else if(!this.form.get('nomeCompleto')?.invalid) {
+      this.errorMessageNome.set('');
     }
-  }
 
-  updateErrorMessageDataNascimento(){
+    //data nascimento
     if (this.form.get('dataNascimento')?.hasError('required')) {
       this.errorMessageDataNascimento.set('Campo obrigatório. Informe uma Data válida.');
     } else if(this.form.get('dataNascimento')?.hasError('DataIncompleta')){
        this.errorMessageDataNascimento.set('Data incompleta. Informe uma Data válida.');
     } else if(this.form.get('dataNascimento')?.hasError('dataInvalida')){
        this.errorMessageDataNascimento.set('Data invalida Informe uma Data válida.');
-    }else {
+    }else if(!this.form.get('dataNascimento')?.invalid){
       this.errorMessageDataNascimento.set('');
     }
+
+    //email
+     if (this.form.get("email")?.hasError('required')) {
+      this.errorMessageEmail.set('Campo obrigatório. Informe um e-mail válido.');
+    } else if (this.form.get("email")?.hasError('email')) {
+      this.errorMessageEmail.set('Não é um email valido');
+    } else if(!this.form.get('email')?.invalid){
+      this.errorMessageEmail.set('');
+    }
+  }
+ 
+
+  private validaSenhaMaiuscula(control: AbstractControl) {
+    const value = control.value;
+    if (!value) return null;
+
+    const errors: any = {};
+    
+    if (!/[A-Z]/.test(value)) {
+      errors['semLetraMaiuscula'] = true;
+    } else {
+      delete errors['semLetraMaiuscula'];
+    }
+
+    return Object.keys(errors).length ? errors : null;
   }
 
+  private validaSenhaMinuscula(control: AbstractControl) {
+    const value = control.value;
+    if (!value) return null;
 
-    onSubmit(){
-      var formularioPossuiErro = this.form.invalid;   // invalid se o formulario tem algum erro e retorna true ou false // se tiver nenhum erro ele retorna false, se tiver algum erro ele retorna true
-      if(formularioPossuiErro == false){
-        console.log(this.form.value);
-        this.openSnackBar("salvo com sucesso");
-      }else {
-        console.log("formulario invalido");
-        console.log(this.form);
-         this.openSnackBar("existem erros no Cadastro");
-      }
-
+    const errors: any = {};
+    if (!/[a-z]/.test(value)) {
+      errors['semLetraMinuscula'] = true;
+    } else {
+      delete errors['semLetraMinuscula'];
     }
+
+    return Object.keys(errors).length ? errors : null;
+  }
+
+  private validaSenhaPossuiNumero(control: AbstractControl) {
+    const value = control.value;
+    if (!value) return null;
+
+    const errors: any = {};
+    if (!/\d/.test(value)) {
+      errors['semNumero'] = true;
+    } else {
+      delete errors['semNumero'];
+    }
+
+    return Object.keys(errors).length ? errors : null;
+  }
+
+  private validaSenhaPossuiCaracterEspecial(control: AbstractControl) {
+    const value = control.value;
+    if (!value) return null;
+
+    const errors: any = {};
+    if (!/[!@#$%^&*(),.?":{}|<>]/.test(value)) {
+      errors['semCaracterEspecial'] = true;
+    } else {
+      delete errors['semCaracterEspecial'];
+    }
+
+    return Object.keys(errors).length ? errors : null;
+  }  
+  clickEvent(event: MouseEvent) {
+    this.hide.set(!this.hide());
+    event.stopPropagation();
+  }
+
+  openSnackBar(mensage : string) {
+    this._snackBar.open(mensage, 'Fechar', {
+      horizontalPosition: "right",  // , é pq é um objeto
+      verticalPosition: "top",
+      duration: 10 * 1000,
+
+    });
+  }
+
+  onSubmit(){
+    var formularioPossuiErro = this.form.invalid;   // invalid se o formulario tem algum erro e retorna true ou false // se tiver nenhum erro ele retorna false, se tiver algum erro ele retorna true
+    if(formularioPossuiErro == false){
+      console.log(this.form.value);
+      this.openSnackBar("salvo com sucesso");
+    }else {
+      console.log("formulario invalido");
+      console.log(this.form);
+        this.openSnackBar("existem erros no Cadastro");
+    }
+
+  }
 
 }

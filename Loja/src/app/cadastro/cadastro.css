@@ -41,6 +41,25 @@ input::placeholder {
   color: rgba(0, 0, 0, 0.26) !important; 
 }
 
+.senhaErro ul{
+  list-style-type: none; 
+  text-align: left;
+}
+
+li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+span.senha-sem-erro{
+  color: green;
+}
+
+
+mat-icon.senha-sem-erro{
+  color: green;
+}
 
 
 .card-footer {
